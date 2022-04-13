@@ -5,41 +5,41 @@
 
 2. Скачать проект
 
-```
-git clone https://github.com/Olegonik/tg-homework-bot
-```
+   ```
+   git clone https://github.com/Olegonik/tg-homework-bot
+   ```
 
 3. Перейти в директорию проекта
 
-```
-cd tg-homework-bot/
-```
+   ```
+   cd tg-homework-bot/
+   ```
 
 4. Создать и записать в файл .env
 
-```
-CHANNEL_ID=<id канала в котором будет производиться поиск и вывод заданий>
-```
+   ```
+   CHANNEL_ID=<id канала в котором будет производиться поиск и вывод заданий>
+   ```
 
 5. Создать и записать в config.ini данные из [telegram api](https://my.telegram.org/apps)
 
-```
-[pyrogram]
-api_hash=
-api_id=
-```
+   ```
+   [pyrogram]
+   api_hash=
+   api_id=
+   ```
 
 7. Установить библиотеки из requirements.txt
 
-```
-pip install -r requirements.txt
-```
+   ```
+   pip install -r requirements.txt
+   ```
 
 6. Запустить бота
 
-```
-python main.py
-```
+   ```
+   python main.py
+   ```
 
 
 ## Команды:
