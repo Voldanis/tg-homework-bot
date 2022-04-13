@@ -31,10 +31,15 @@ def f(_, message):
         sleep(1)
         msg.delete()
         return 0
+
     args = args[1:]  # delete prefix of command
 
     hw_for_tomorrow = dict()
     for arg in args:
+        for s in range(len(arg)):
+            if arg[s] == "-":
+                arg = arg[:s] + " " + arg[s+1:]
+                
         b = False
         for leftAdd in ["**", ""]:
             for rightAdd in ["**", ""]:
