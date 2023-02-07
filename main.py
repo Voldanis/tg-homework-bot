@@ -2,6 +2,7 @@ from pyrogram import Client, filters
 
 import logging
 from time import sleep
+from configparser import ConfigParser
 
 
 logging.basicConfig(
@@ -11,7 +12,9 @@ logging.basicConfig(
 
 # program body
 app = Client("controller")
-CHANNEL_ID = -1001659140986
+config = ConfigParser()
+config.read("config.ini")
+CHANNEL_ID = config.getint('bot', 'channel_id', fallback=0)
 
 
 # post homework
