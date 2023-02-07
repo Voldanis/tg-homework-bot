@@ -32,10 +32,8 @@ def f(_, message):
 
     hw_for_tomorrow = dict()
     for arg in args:
-        for s in range(len(arg)):
-            if arg[s] == "-":
-                arg = arg[:s] + " " + arg[s+1:]
-                
+        arg = arg.replace("-", " ")
+
         b = False
         for leftAdd in ["**", ""]:
             for rightAdd in ["**", ""]:
@@ -46,13 +44,17 @@ def f(_, message):
                     continue
                 for msg in last_arg:
                     i = 0
-                    while msg.text[i:i+len(arg)].lower() != arg:  # поиск предмета в сообщении
+                    while msg.text[i:i+len(arg)].lower() != arg and i < len(msg.text):  # поиск предмета в сообщении
                         i += 1
+                    if i == len(msg.text):
+                        continue
                     while msg.text[i-1] != '\n' and i > 0:
                         i -= 1
                     start_name = i
-                    while msg.text[i] != '\n':  # переход на следующую строку
+                    while msg.text[i] != '\n' and i < len(msg.text):  # переход на следующую строку
                         i += 1
+                    if i == len(msg.text):
+                        continue
                     end_name = i
                     name = msg.text[start_name:end_name]
                     i += 1
@@ -66,6 +68,7 @@ def f(_, message):
                     hw_for_tomorrow[name] = hw
 
                     b = True
+                    break
                 if b:
                     break
             if b:
