@@ -1,34 +1,27 @@
-from pyrogram import Client
-from pyrogram import filters
+from pyrogram import Client, filters
 
 import logging
 from time import sleep
-from dotenv import load_dotenv
-from os import getenv
 
 
 logging.basicConfig(
-        format="[%(levelname)s] %(message)s",
-        level=logging.INFO
+    format="[%(levelname)s] %(message)s",
+    level=logging.INFO
 )
-
-# get .env constants
-load_dotenv()
-
-CHANNEL_ID = int(getenv("CHANNEL_ID"))
 
 # program body
 app = Client("controller")
-moderators = [1210453612, 1096006718, 1138946626]
+CHANNEL_ID = -1001659140986
+
 
 # post homework
-@app.on_message(filters.command(["homework", "hw"]) & (filters.user(moderators) | filters.chat(CHANNEL_ID)))
+@app.on_message(filters.command(["homework", "hw"]) & filters.chat(CHANNEL_ID))
 def f(_, message):
     message.delete()
     args = message.text.split()
     if len(args) <= 1:
         msg = app.send_message(message.chat.id, "Не введены предметы")
-        sleep(1)
+        sleep(2)
         msg.delete()
         return 0
 
@@ -44,7 +37,7 @@ def f(_, message):
         for leftAdd in ["**", ""]:
             for rightAdd in ["**", ""]:
                 findArg = leftAdd + arg + rightAdd
-                last_arg = list(app.search_messages(CHANNEL_ID, findArg, limit=1))
+                last_arg = list(app.search_messages(message.chat.id, findArg, limit=1))
                 arg = arg.lower()
                 if not last_arg:
                     continue
@@ -76,12 +69,17 @@ def f(_, message):
                 break
         if not b:
             msg = app.send_message(message.chat.id, f"Нет записей про {arg}")
-            sleep(1)
+            sleep(2)
             msg.delete()
     res_msg_text = "**Домашнее задание**"
     for name, hw in hw_for_tomorrow.items():
         res_msg_text += f"\n\n**{name}**\n{hw}"
-    app.send_message(CHANNEL_ID, res_msg_text)
+    app.send_message(message.chat.id, res_msg_text)
+
+
+@app.on_message(filters.command("getId") & filters.me)
+def f(_, msg):
+    msg.edit(msg.chat.id)
 
 
 app.run()
