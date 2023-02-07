@@ -13,7 +13,7 @@
     cd tg-homework-bot/
     ```
 
-4. Создать и записать в config.ini данные из [telegram api](https://my.telegram.org/apps)
+4. Создать файл config.ini и записать в него данные из [telegram api](https://my.telegram.org/apps)
     ```
     [pyrogram]
     api_hash=
