@@ -13,19 +13,14 @@
     cd tg-homework-bot/
     ```
 
-4. Создать и записать в файл .env
-    ```
-    CHANNEL_ID=<id канала в котором будет производиться поиск и вывод заданий>
-    ```
-
-5. Создать и записать в config.ini данные из [telegram api](https://my.telegram.org/apps)
+4. Создать и записать в config.ini данные из [telegram api](https://my.telegram.org/apps)
     ```
     [pyrogram]
     api_hash=
     api_id=
     ```
 
-7. Установить библиотеки из requirements.txt
+5. Установить библиотеки из requirements.txt
     ```
     pip install -r requirements.txt
     ```
@@ -34,7 +29,7 @@
     ```
     python main.py
     ```
-   В первый раз необходимо авторизоваться в аккаунте telegram, данные будут храниться в файле controller.session в директории main.py
+   В первый раз необходимо авторизоваться в аккаунте telegram, данные будут храниться в файле controller.session в директории проекта
 
 ---
 
