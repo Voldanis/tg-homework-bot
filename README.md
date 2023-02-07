@@ -5,7 +5,7 @@
 
 2. Скачать проект
     ```
-    git clone https://github.com/Olegonik/tg-homework-bot
+    git clone https://github.com/n1ret/tg-homework-bot
     ```
 
 3. Перейти в директорию проекта
