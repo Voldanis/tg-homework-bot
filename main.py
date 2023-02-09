@@ -44,27 +44,28 @@ def f(_, message):
                     continue
                 for msg in last_arg:
                     i = 0
-                    while msg.text[i:i+len(arg)].lower() != arg and i < len(msg.text):  # поиск предмета в сообщении
+                    text = msg.text or msg.caption
+                    while text[i:i+len(arg)].lower() != arg and i < len(text):  # поиск предмета в сообщении
                         i += 1
-                    if i == len(msg.text):
+                    if i == len(text):
                         continue
-                    while msg.text[i-1] != '\n' and i > 0:
+                    while text[i-1] != '\n' and i > 0:
                         i -= 1
                     start_name = i
-                    while msg.text[i] != '\n' and i < len(msg.text):  # переход на следующую строку
+                    while text[i] != '\n' and i < len(text):  # переход на следующую строку
                         i += 1
-                    if i == len(msg.text):
+                    if i == len(text):
                         continue
                     end_name = i
-                    name = msg.text[start_name:end_name]
+                    name = text[start_name:end_name]
                     i += 1
                     start_pos = i
-                    while msg.text[i] != '\n' and i < len(msg.text)-1:  # передвижение курсора до конца задания
+                    while text[i] != '\n' and i < len(text)-1:  # передвижение курсора до конца задания
                         i += 1
-                    if msg.text[i] == '\n':
+                    if text[i] == '\n':
                         i -= 1
                     end_pos = i+1
-                    hw = msg.text[start_pos:end_pos]
+                    hw = text[start_pos:end_pos]
                     hw_for_tomorrow[name] = hw
 
                     b = True
