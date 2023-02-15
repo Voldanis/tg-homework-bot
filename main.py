@@ -6,24 +6,46 @@ import calendar
 import datetime
 
 
-english_Tahmina = "анг1"
-english_Julia = "анг2"
-history = "ист"
-russian = "рус"
-physics = "физ"
-geometry = "геом"
-literature = "лит"
-algebra = "алг"
-geography = "геог"
-biology = "био"
-chemistry = "хим"
-social_study = "общ"
-informatics = "инф"
+english_Tahmina = "тахмины"
+english_Julia = "юлии"
+history = "история"
+russian = "русский"
+physics = "физика"
+geometry = "геометрия"
+literature = "литература"
+algebra = "алгебра"
+geography = "география"
+biology = "биология"
+chemistry = "химия"
+social_study = "обществознание"
+informatics = "информатика"
 russian_OGE = "огэ"
-mrgz = "мргз"
-next_day = ["на вторник", "на среду", "на четверг", "на пятницу", "на понедельник", "на понедельник", "на понедельник"]
+mrgz = "методология"
+subjects_for_day = [[english_Tahmina, english_Julia, history, russian, physics, geometry, literature],
+                    [geometry, geography, biology, algebra, physics],
+                    [chemistry, literature, geometry, geography, english_Tahmina, english_Julia, social_study, russian],
+                    [algebra, chemistry],
+                    [mrgz, biology, english_Tahmina, english_Julia, physics, literature, history],
+                    [mrgz, biology, english_Tahmina, english_Julia, physics, literature, history],
+                    [mrgz, biology, english_Tahmina, english_Julia, physics, literature, history]]
+full_subjects_names = {english_Tahmina: "Английский язык (группа Тахмины)",
+                       english_Julia: "Английский язык (группа Юлии)",
+                       history: "История",
+                       russian: "Русский язык",
+                       physics: "Физика",
+                       geometry: "Геометрия",
+                       literature: "Литература",
+                       algebra: "Алгебра",
+                       geography: "География",
+                       biology: "Биология",
+                       chemistry: "Химия",
+                       social_study: "Обществознание",
+                       informatics: "Информатика (группа Льва)",
+                       russian_OGE: "Русский язык подготовка к ОГЭ",
+                       mrgz: "Методология решения геометрических задач"}
 work_day_start_time = ["8:00", "8:50", "9:50", "10:50", "11:50"]
 work_day_finish_time = ["8:40", "9:30", "10:30", "11:30", "12:30", "13:20", "14:10", "15:10"]
+next_day = ["на вторник", "на среду", "на четверг", "на пятницу", "на понедельник", "на понедельник", "на понедельник"]
 
 logging.basicConfig(
     format="[%(levelname)s] %(message)s",
@@ -104,14 +126,19 @@ def f(_, message):
 
 
 @app.on_message(filters.command("getId") & filters.me)
-def f(_, msg):
-    msg.edit(msg.chat.id)
+def f(_, mesage):
+    mesage.edit(mesage.chat.id)
 
 
 @app.on_message(filters.command("sh"))
 def f(_, message):
     today = get_week_day()
     label = "**Домашние занания " + next_day[today] + "**\nC "
+
+    if message.text != None:
+        message.delete()
+        send_error_message(message.chat.id, "Необходимо послать фото")
+        return
 
     if len(message.caption) > 3:
         label += work_day_start_time[int(message.caption[-2]) - 1] + " до " + work_day_finish_time[int(message.caption[-1]) - 1]
@@ -127,9 +154,28 @@ def f(_, message):
 
 @app.on_message(filters.command("dz"))
 def f(_, message):
+    message.delete()
     args = message.text.split()
     args = args[1:]
-    message.edit(generate_pattern(get_week_day(), args))
+    today = get_week_day()
+    subjects = subjects_for_day[today]
+
+    for i in args:
+        if i[0] == "-":
+            if i[1:] in subjects:
+                subjects.remove(i[1:])
+            else:
+                send_error_message(message.chat.id, "Предмета " + i[1:] + " сегодня нет")
+        else:
+            subjects.append(i)
+
+    pattern = "**Домашние задания**\n\n"
+    for i in subjects:
+        if i in full_subjects_names:
+            pattern += "**" + full_subjects_names[i] + "**\n.\n\n"
+        else:
+            send_error_message(message.chat.id, "Предмета " + i + " не существует")
+    app.send_message(message.chat.id, pattern)
 
 
 def get_week_day():
@@ -137,59 +183,10 @@ def get_week_day():
     return calendar.weekday(y, m, d)
 
 
-def generate_pattern(week_day, args):
-    if week_day == 0:
-        subjects = [english_Tahmina, english_Julia, history, russian, physics, geometry, literature]
-    elif week_day == 1:
-        subjects = [geometry, geography, biology, algebra, physics]
-    elif week_day == 2:
-        subjects = [chemistry, literature, geometry, geography, english_Tahmina, english_Julia, social_study, russian]
-    elif week_day == 3:
-        subjects = [algebra, chemistry]
-    else:
-        subjects = [mrgz, biology, english_Tahmina, english_Julia, physics, literature, history]
-
-    for i in args:
-        if i[0] == "-":
-            subjects.remove(i[1:])
-        else:
-            subjects.append(i)
-
-    pattern = "**Домашние задания**\n\n"
-    for i in subjects:
-        pattern += "**"
-        if i == english_Tahmina:
-            pattern += "Английский язык (группа Тахмины)"
-        elif i == english_Julia:
-            pattern += "Английский язык (группа Юлии)"
-        elif i == history:
-            pattern += "История"
-        elif i == russian:
-            pattern += "Русский язык"
-        elif i == physics:
-            pattern += "Физика"
-        elif i == geometry:
-            pattern += "Геометрия"
-        elif i == literature:
-            pattern += "Литература"
-        elif i == algebra:
-            pattern += "Алгебра"
-        elif i == geography:
-            pattern += "География"
-        elif i == biology:
-            pattern += "Биология"
-        elif i == chemistry:
-            pattern += "Химия"
-        elif i == social_study:
-            pattern += "Обществознание"
-        elif i == informatics:
-            pattern += "Информатика (группа Льва)"
-        elif i == russian_OGE:
-            pattern += "Русский язык подготовка к ОГЭ"
-        elif i == mrgz:
-            pattern += "Методология решения геометрических задач"
-        pattern += "**\n.\n\n"
-    return pattern
+def send_error_message(id, text):
+    mesage = app.send_message(id, text)
+    sleep(3)
+    mesage.delete()
 
 
 app.run()
