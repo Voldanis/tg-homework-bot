@@ -1,9 +1,26 @@
 from pyrogram import Client, filters
-
 import logging
 from time import sleep
 from configparser import ConfigParser
+import calendar
+import datetime
 
+
+english_Tahmina = "анг1"
+english_Julia = "анг2"
+history = "ист"
+russian = "рус"
+physics = "физ"
+geometry = "геом"
+literature = "лит"
+algebra = "алг"
+geography = "геог"
+biology = "био"
+chemistry = "хим"
+social_study = "общ"
+informatics = "инф"
+russian_OGE = "огэ"
+mrgz = "мргз"
 
 logging.basicConfig(
     format="[%(levelname)s] %(message)s",
@@ -44,28 +61,27 @@ def f(_, message):
                     continue
                 for msg in last_arg:
                     i = 0
-                    text = msg.text or msg.caption
-                    while text[i:i+len(arg)].lower() != arg and i < len(text):  # поиск предмета в сообщении
+                    while msg.text[i:i+len(arg)].lower() != arg and i < len(msg.text):  # поиск предмета в сообщении
                         i += 1
-                    if i == len(text):
+                    if i == len(msg.text):
                         continue
-                    while text[i-1] != '\n' and i > 0:
+                    while msg.text[i-1] != '\n' and i > 0:
                         i -= 1
                     start_name = i
-                    while text[i] != '\n' and i < len(text):  # переход на следующую строку
+                    while msg.text[i] != '\n' and i < len(msg.text):  # переход на следующую строку
                         i += 1
-                    if i == len(text):
+                    if i == len(msg.text):
                         continue
                     end_name = i
-                    name = text[start_name:end_name]
+                    name = msg.text[start_name:end_name]
                     i += 1
                     start_pos = i
-                    while text[i] != '\n' and i < len(text)-1:  # передвижение курсора до конца задания
+                    while msg.text[i] != '\n' and i < len(msg.text)-1:  # передвижение курсора до конца задания
                         i += 1
-                    if text[i] == '\n':
+                    if msg.text[i] == '\n':
                         i -= 1
                     end_pos = i+1
-                    hw = text[start_pos:end_pos]
+                    hw = msg.text[start_pos:end_pos]
                     hw_for_tomorrow[name] = hw
 
                     b = True
@@ -87,6 +103,76 @@ def f(_, message):
 @app.on_message(filters.command("getId") & filters.me)
 def f(_, msg):
     msg.edit(msg.chat.id)
+
+
+#@app.on_message(filters.command("sh"))
+
+
+@app.on_message(filters.command("dz"))
+def f(_, message):
+    args = message.text.split()
+    args = args[1:]
+    message.edit(generate_pattern(get_week_day(), args))
+
+
+def get_week_day():
+    y, m, d = map(int, str(datetime.date.today()).split("-"))
+    return calendar.weekday(y, m, d)
+
+
+def generate_pattern(week_day, args):
+    if week_day == 0:
+        subjects = [english_Tahmina, english_Julia, history, russian, physics, geometry, literature]
+    elif week_day == 1:
+        subjects = [geometry, geography, biology, algebra, physics]
+    elif week_day == 2:
+        subjects = [chemistry, literature, geometry, geography, english_Tahmina, english_Julia, social_study, russian]
+    elif week_day == 3:
+        subjects = [algebra, chemistry]
+    else:
+        subjects = [mrgz, biology, english_Tahmina, english_Julia, physics, literature, history]
+
+    for i in args:
+        if i[0] == "-":
+            subjects.remove(i[1:])
+        else:
+            subjects.append(i)
+
+    pattern = "**Домашние задания**\n\n"
+    for i in subjects:
+        pattern += "**"
+        if i == english_Tahmina:
+            pattern += "Английский язык (группа Тахмины)"
+        elif i == english_Julia:
+            pattern += "Английский язык (группа Юлии)"
+        elif i == history:
+            pattern += "История"
+        elif i == russian:
+            pattern += "Русский язык"
+        elif i == physics:
+            pattern += "Физика"
+        elif i == geometry:
+            pattern += "Геометрия"
+        elif i == literature:
+            pattern += "Литература"
+        elif i == algebra:
+            pattern += "Алгебра"
+        elif i == geography:
+            pattern += "География"
+        elif i == biology:
+            pattern += "Биология"
+        elif i == chemistry:
+            pattern += "Химия"
+        elif i == social_study:
+            pattern += "Обществознание"
+        elif i == informatics:
+            pattern += "Информатика (группа Льва)"
+        elif i == russian_OGE:
+            pattern += "Русский язык подготовка к ОГЭ"
+        elif i == mrgz:
+            pattern += "Методология решения геометрических задач"
+        pattern += "**\n.\n\n"
+    return pattern
 
 
 app.run()
