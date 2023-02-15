@@ -21,6 +21,9 @@ social_study = "общ"
 informatics = "инф"
 russian_OGE = "огэ"
 mrgz = "мргз"
+next_day = ["на вторник", "на среду", "на четверг", "на пятницу", "на понедельник", "на понедельник", "на понедельник"]
+work_day_start_time = ["8:00", "8:50", "9:50", "10:50", "11:50"]
+work_day_finish_time = ["8:40", "9:30", "10:30", "11:30", "12:30", "13:20", "14:10", "15:10"]
 
 logging.basicConfig(
     format="[%(levelname)s] %(message)s",
@@ -105,7 +108,21 @@ def f(_, msg):
     msg.edit(msg.chat.id)
 
 
-#@app.on_message(filters.command("sh"))
+@app.on_message(filters.command("sh"))
+def f(_, message):
+    today = get_week_day()
+    label = "**Домашние занания " + next_day[today] + "**\nC "
+
+    if len(message.caption) > 3:
+        label += work_day_start_time[int(message.caption[-2]) - 1] + " до " + work_day_finish_time[int(message.caption[-1]) - 1]
+    else:
+        label += work_day_start_time[0] + " до "
+        if today == 2:
+            label += work_day_finish_time[5]
+        else:
+            label += work_day_finish_time[6]
+    message.edit(label)
+
 
 
 @app.on_message(filters.command("dz"))
@@ -176,3 +193,4 @@ def generate_pattern(week_day, args):
 
 
 app.run()
+
