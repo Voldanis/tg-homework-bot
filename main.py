@@ -54,7 +54,7 @@ logging.basicConfig(
 app = Client("controller")
 config = ConfigParser()
 config.read("config.ini")
-CHANNEL_ID = config.getint('bot', 'channel_id', fallback=0) # -1001633320063 -- тест_группа -1001632804461 -- дз_группа
+CHANNEL_ID = config.getint('bot', 'channel_id', fallback=0)
 
 
 # post homework
@@ -65,52 +65,60 @@ def f(_, message):
     args = message.text.split()
     args = args[1:]
     subjects = input_handle((subjects_for_day[(today + 1) % 5]), args)
-
     hw_for_tomorrow = dict()
+
     for arg in subjects:
-
-        b = False
-        for leftAdd in ["**", ""]:
-            for rightAdd in ["**", ""]:
-                findArg = leftAdd + arg + rightAdd
-                last_arg = list(app.search_messages(CHANNEL_ID, findArg, limit=10))
-                arg = arg.lower()
-                if not last_arg:
-                    continue
-                for msg in last_arg:
-                    if msg.text == None:
-                        continue
-                    i = 0
-                    while msg.text[i:i+len(arg)].lower() != arg and i < len(msg.text):  # поиск предмета в сообщении
-                        i += 1
-                    if i == len(msg.text):
-                        continue
-                    while msg.text[i-1] != '\n' and i > 0:
-                        i -= 1
-                    start_name = i
-                    while msg.text[i] != '\n' and i < len(msg.text):  # переход на следующую строку
-                        i += 1
-                    if i == len(msg.text):
-                        continue
-                    end_name = i
-                    name = msg.text[start_name:end_name]
-                    i += 1
-                    start_pos = i
-                    while i < len(msg.text)-1 and (msg.text[i] != '\n' or msg.text[i + 1] != '\n'):  # передвижение курсора до конца задания
-                        i += 1
-                    if msg.text[i] == '\n':
-                        i -= 1
-                    end_pos = i+1
-                    hw = msg.text[start_pos:end_pos]
-                    hw_for_tomorrow[name] = hw
-
-                    b = True
+        # поиск сообщений с упоминанием предмета
+        for left_add in ["**", ""]:
+            for right_add in ["**", ""]:
+                find_arg = left_add + arg + right_add
+                messages_with_subject = list(app.search_messages(CHANNEL_ID, find_arg, limit=10))
+                if len(messages_with_subject) > 0:
                     break
-                if b:
-                    break
-            if b:
+            if len(messages_with_subject) > 0:
                 break
-        if not b:
+
+        # поиск домашнего задания в сообщении
+        hw_find = False
+        j = 0
+        while not hw_find:
+            msg = messages_with_subject[j]
+            j += 1
+            # проверка на то, что сообщение - текст (не фото, не документ)
+            if msg.text == None:
+                continue
+            # поиск предмета в сообщении
+            i = 0
+            while msg.text[i:i + len(arg)].lower() != arg and i < len(msg.text):
+                i += 1
+            if i == len(msg.text):
+                continue
+            # поиск начала заглавия домашнего задания
+            while msg.text[i - 1] != '\n' and i > 0:
+                i -= 1
+            start_name = i
+            # поиск конца заглавия домашнего задания
+            while msg.text[i] != '\n' and i < len(msg.text):
+                i += 1
+            if i == len(msg.text):
+                continue
+            end_name = i
+            name = msg.text[start_name:end_name]
+            # начало текста домашнего задания
+            i += 1
+            start_pos = i
+            # поиск конца текста домашнего задания
+            while i < len(msg.text) - 1 and (msg.text[i] != '\n' or msg.text[i + 1] != '\n'):
+                i += 1
+            if msg.text[i] == '\n':
+                i -= 1
+            end_pos = i + 1
+
+            hw = msg.text[start_pos:end_pos]
+            hw_for_tomorrow[name] = hw
+            hw_find = True
+
+        if not hw_find:
             send_error_message(f"Нет записей про {arg}")
 
     res_msg_text = "**Домашние занания " + next_day[today] + "**"
@@ -148,7 +156,6 @@ def f(_, message):
         message.edit(label)
     else:
         app.send_photo(CHANNEL_ID, "pensive_cat.jpg", label)
-
 
 
 @app.on_message(filters.command("dz") & filters.chat(CHANNEL_ID))
